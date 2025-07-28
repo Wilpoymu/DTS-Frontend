@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { DemoConfigProvider } from '@/hooks/use-demo-config'
+import { DemoModeIndicator } from '@/components/demo-mode-indicator'
 
 export const metadata: Metadata = {
   title: 'DTS - Carrier Waterfalls',
@@ -16,9 +18,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <DemoConfigProvider>
+          <AuthProvider>
+            {children}
+            <DemoModeIndicator />
+          </AuthProvider>
+        </DemoConfigProvider>
       </body>
     </html>
   )
