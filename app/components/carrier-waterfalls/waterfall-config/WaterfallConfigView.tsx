@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Checkbox } from "@/components/ui/checkbox"
 import { ChevronLeft, Settings, Truck, Plus, Trash2, Eye, Clock, Users, GripVertical, Edit, Search, X, Calendar, CheckCircle, Loader2, AlertTriangle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { useCarriers } from "@/hooks/use-carriers"
+import { useCarriersAdaptive } from "@/hooks/use-carriers-adaptive"
 
 interface WaterfallConfigViewProps {
   currentLane: any
@@ -52,7 +52,7 @@ export default function WaterfallConfigView({
     loading: carriersLoading, 
     error: carriersError, 
     fetchCarriers 
-  } = useCarriers()
+  } = useCarriersAdaptive()
   const { toast } = useToast()
   
   // Estados para los modales
