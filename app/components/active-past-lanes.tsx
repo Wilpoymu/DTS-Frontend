@@ -358,18 +358,18 @@ export default function ActivePastLanes({ onNavigateToWaterfall }: ActivePastLan
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1 || isLoading}
               >
-                Anterior
+                Back
               </Button>
-              <span className="text-sm">Página {page} de {totalPages}</span>
+              <span className="text-sm">Page {page} de {totalPages}</span>
               <Button
                 variant="outline"
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={isLoading || page === totalPages}
               >
-                Siguiente
+                Next
               </Button>
             </div>
-            {isLoading && <div className="text-center text-gray-500 py-2">Cargando...</div>}
+            {isLoading && <div className="text-center text-gray-500 py-2">Loading...</div>}
           </div>
         </CardContent>
       </Card>
