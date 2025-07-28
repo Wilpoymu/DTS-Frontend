@@ -1,0 +1,102 @@
+# Dependencias
+node_modules
+npm-debug.log*
+pnpm-debug.log*
+
+# Archivos de construcción local
+.next/
+out/
+build/
+
+# Variables de entorno
+.env*
+!.env.example
+
+# Archivos de desarrollo
+.git/
+.gitignore
+README.md
+README-Docker.md
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+
+# Archivos de testing
+coverage/
+.nyc_output
+__tests__
+*.test.*
+*.spec.*
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.history/
+
+# Logs
+*.log
+logs/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# ESLint cache
+.eslintcache
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# Yarn v2
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# Temporal files
+tmp/
+temp/
+
+# Documentation
+docs/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# Deployment
+deployment/
+k8s/
+helm/

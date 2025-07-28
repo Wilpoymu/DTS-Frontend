@@ -1,0 +1,1963 @@
+// Legacy component - now using refactored version
+import CarrierWaterfallsRefactored from "./carrier-waterfalls"
+import { CarrierWaterfallsProps } from "./carrier-waterfalls/shared/types"
+
+export default function CarrierWaterfalls(props: CarrierWaterfallsProps = {}) {
+  return <CarrierWaterfallsRefactored {...props} />
+}
+
+  const renderWaterfallConfiguration = (isEditing: boolean) => (
+    <Card>
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle>Waterfall Configuration</CardTitle>
+            <CardDescription>
+              {isEditing
+                ? "Configure carrier dispatch sequence, rates, and response windows."
+                : "View carrier dispatch sequence, rates, and response windows."}
+            </CardDescription>
+          </div>
+          {isEditing && (
+            <Button variant="outline" onClick={addCarrier}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Carrier
+            </Button>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent>
+        {customTiers.length > 0 && isEditing && (
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Custom Tiers</h3>
+              <Badge variant="outline" className="gap-1">
+                <Users className="h-3 w-3" />
+                {customTiers.length} tier{customTiers.length !== 1 ? "s" : ""}
+              </Badge>
+            </div>
+            <div className="space-y-3">
+              {customTiers.map((tier) => {
+                const tierCarriers = waterfallItems.filter((item) =>
+                  tier.carrierIds.includes(item.carrier.id),
+                )
+                return (
+                  <div key={tier.id} className="border rounded-lg p-4 bg-muted/20">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Badge variant="default" className="gap-1">
+                          <Users className="h-3 w-3" />
+                          {tier.name}
+                        </Badge>
+                        <span className="text-sm text-muted-foreground">
+                          {tierCarriers.length} carrier{tierCarriers.length !== 1 ? "s" : ""}:{" "}
+                          {tierCarriers.map((item) => item.carrier.name).join(", ")}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openEditTierModal(tier)}
+                        >
+                          <Settings className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => deleteCustomTier(tier.id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+            <div className="border-t mt-4 pt-4">
+              <h4 className="font-medium mb-2">All Carriers</h4>
+            </div>
+          </div>
+        )}
+
+        {waterfallItems.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            <p>No carriers configured yet.</p>
+            {isEditing && <p className="text-sm">Add carriers to get started.</p>}
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="h-10">
+                  {isEditing && <TableHead className="w-8 text-xs"></TableHead>}
+                  <TableHead className="w-20 text-xs">MC Number</TableHead>
+                  <TableHead className="w-32 text-xs">Name</TableHead>
+                  <TableHead className="w-36 text-xs">Main Contact</TableHead>
+                  <TableHead className="w-36 text-xs">Secondary Contact</TableHead>
+                  <TableHead className="w-20 text-xs">Rate</TableHead>
+                  <TableHead className="w-24 text-xs">Response Window</TableHead>
+                  <TableHead className="w-24 text-xs">Capacity</TableHead>
+                  <TableHead className="w-20 text-xs">% Acceptance</TableHead>
+                  <TableHead className="w-20 text-xs">% On time pickup</TableHead>
+                  <TableHead className="w-20 text-xs">% On time delivery</TableHead>
+                  {isEditing && <TableHead className="w-16 text-xs text-right">Actions</TableHead>}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {waterfallItems.map((item, index) => {
+                  // Determinar si esta fila debe ser destacada
+                  const tierNumber = index + 1
+                  const tierName = `Tier ${tierNumber}`
+                  const isHighlighted = highlightedLoadInfo?.assignedTier === tierName
+                  
+                  return (
+                    <TableRow
+                      key={item.id}
+                      draggable={isEditing}
+                      onDragStart={(e) => handleDragStart(e, item.id)}
+                      onDragOver={(e) => handleDragOver(e, item.id)}
+                      onDragLeave={handleDragLeave}
+                      onDrop={(e) => handleDrop(e, item.id)}
+                      onDragEnd={handleDragEnd}
+                      className={isHighlighted ? "bg-blue-50 border-l-4 border-l-blue-500" : ""}
+                    >
+                    {isEditing && (
+                      <TableCell className="text-xs cursor-move">
+                        <GripVertical className="h-4 w-4 text-gray-400" />
+                      </TableCell>
+                    )}
+                    <TableCell className="text-xs font-medium">
+                      <div className="flex items-center gap-2">
+                        {item.carrier.mcNumber}
+                        {isHighlighted && (
+                          <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800">
+                            Load {highlightedLoadInfo?.loadId}
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      <div className="font-medium">{item.carrier.name}</div>
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      <div className="font-medium">{item.carrier.contactName || "-"}</div>
+                      {item.carrier.contactEmail && (
+                        <div className="text-xs text-gray-500 mt-1">{item.carrier.contactEmail}</div>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      <div className="font-medium">{item.carrier.secondaryContactName || "-"}</div>
+                      {item.carrier.secondaryContactEmail && (
+                        <div className="text-xs text-gray-500 mt-1">{item.carrier.secondaryContactEmail}</div>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {isEditing ? (
+                        <div className="relative">
+                          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                          <Input
+                            type="number"
+                            value={item.carrier.rate || ""}
+                            onChange={(e) => updateWaterfallItem(item.id, "rate", parseFloat(e.target.value))}
+                            className="min-w-20 pl-6 h-8 text-xs"
+                          />
+                        </div>
+                      ) : (
+                        <span className="font-medium whitespace-nowrap">${(item.carrier.rate || 0).toFixed(0)}</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {isEditing ? (
+                        <div className="flex items-center gap-1">
+                          <Input
+                            type="number"
+                            value={item.responseWindow}
+                            onChange={(e) =>
+                              updateWaterfallItem(item.id, "responseWindow", parseInt(e.target.value))
+                            }
+                            className="w-16 h-8 text-xs"
+                          />
+                          <span className="text-xs text-gray-600">min</span>
+                        </div>
+                      ) : (
+                        <span className="text-xs">{item.responseWindow}</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setViewingCarrierCapacity(item.carrier)
+                          setShowViewCapacityModal(true)
+                        }}
+                        className="h-6 px-2 text-xs"
+                      >
+                        {(item.carrier.availability?.length || 0) > 0
+                          ? `${item.carrier.availability?.length} rule(s)`
+                          : "No rules"}
+                      </Button>
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      <span className="text-xs">{item.carrier.acceptancePercentage || 0}%</span>
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      <span className="text-xs">{item.carrier.onTimePickupPercentage || 0}%</span>
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      <span className="text-xs">{item.carrier.onTimeDeliveryPercentage || 0}%</span>
+                    </TableCell>
+                    {isEditing && (
+                      <TableCell className="text-right">
+                        <Button size="sm" variant="ghost" onClick={() => removeWaterfallItem(item.id)} className="h-6 w-6 p-0">
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </CardContent>
+      {isEditing && waterfallItems.length > 0 && (
+        <CardFooter className="flex justify-between items-center">
+          <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-3">
+              <Switch
+                id="auto-tier-global"
+                checked={autoTierEnabled}
+                onCheckedChange={setAutoTierEnabled}
+              />
+              <Label htmlFor="auto-tier-global" className="text-sm font-medium">
+                Enable Auto-Tier Grouping
+              </Label>
+              <span className="text-xs text-gray-500">
+                Automatically group carriers with the same rate
+              </span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={openCreateTierModal}
+                className="gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Create Custom Tier
+              </Button>
+              {customTiers.length > 0 && (
+                <Badge variant="secondary" className="gap-1">
+                  <Users className="h-3 w-3" />
+                  {customTiers.length} custom tier{customTiers.length !== 1 ? 's' : ''}
+                </Badge>
+              )}
+            </div>
+          </div>
+          <Button onClick={saveWaterfallChanges}>Save Changes</Button>
+        </CardFooter>
+      )}
+    </Card>
+  )
+
+  if (currentStep === "waterfall-details" && selectedWaterfallForDetails) {
+    const latestLoads = getLatestProcessedLoads()
+
+    return (
+      <div className="space-y-8">
+        {/* Header with Back Button and Title */}
+        <div className="flex items-center gap-4">
+          <Button variant="outline" onClick={handleBackToWaterfalls} className="gap-2 bg-transparent">
+            <ArrowLeft className="h-4 w-4" />
+            Back to All Waterfalls
+          </Button>
+          <h1 className="text-3xl font-bold text-gray-900">Waterfall Details</h1>
+        </div>
+
+        {/* Alert para información de la carga navegada */}
+        {showLoadDetailsAlert && highlightedLoadInfo && (
+          <Alert className="border-blue-200 bg-blue-50">
+            <AlertTriangle className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800">
+              <strong>Load Information:</strong> You are viewing this waterfall from Load {highlightedLoadInfo.loadId}.
+              {highlightedLoadInfo.assignedTier && (
+                <span> This load was assigned to <strong>{highlightedLoadInfo.assignedTier}</strong>.</span>
+              )}
+              {highlightedLoadInfo.laneId && (
+                <span> Lane ID: <strong>{highlightedLoadInfo.laneId}</strong></span>
+              )}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setShowLoadDetailsAlert(false)}
+                className="ml-2 h-6 px-2 text-blue-800 hover:bg-blue-100"
+              >
+                ×
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {showTriggeredWarning && (
+          <Alert className="border-yellow-200 bg-yellow-50">
+            <AlertTriangle className="h-4 w-4 text-yellow-600" />
+            <AlertDescription className="text-yellow-800">
+              <strong>Warning:</strong> You are editing a waterfall with "Triggered" status. Changes may affect ongoing
+              operations.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Lane Summary */}
+        <Card className="border-2">
+          <CardHeader>
+            <CardTitle className="text-xl">Lane Summary</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground">Origin ZIP</Label>
+                <p className="text-2xl font-bold text-primary">{selectedWaterfallForDetails.originZip}</p>
+                {(() => {
+                  const location = getLocationFromZip(selectedWaterfallForDetails.originZip)
+                  return location ? (
+                    <p className="text-sm text-muted-foreground">
+                      {location.city}, {location.state}
+                    </p>
+                  ) : null
+                })()}
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground">Destination ZIP</Label>
+                <p className="text-2xl font-bold text-primary">{selectedWaterfallForDetails.destinationZip}</p>
+                {(() => {
+                  const location = getLocationFromZip(selectedWaterfallForDetails.destinationZip)
+                  return location ? (
+                    <p className="text-sm text-muted-foreground">
+                      {location.city}, {location.state}
+                    </p>
+                  ) : null
+                })()}
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground">Equipment</Label>
+                <p className="text-2xl font-bold">{selectedWaterfallForDetails.equipment}</p>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground">Status</Label>
+                <div className="mt-1">{getStatusBadge(selectedWaterfallForDetails.status)}</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Tabs Section */}
+        <Tabs defaultValue="configuration" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 h-12">
+            <TabsTrigger value="configuration" className="text-base">
+              Waterfall Configuration
+            </TabsTrigger>
+            <TabsTrigger value="execution" className="text-base">
+              Execution Summary
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="configuration" className="mt-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardDescription className="text-base">
+                    Carrier dispatch sequence and response windows
+                  </CardDescription>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={openCreateTierModal}
+                      className="gap-2"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Create Custom Tier
+                    </Button>
+                    <Button variant="outline" onClick={handleEditWaterfall} className="gap-2 bg-transparent">
+                      <Settings className="h-4 w-4" />
+                      Edit Configuration
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {(() => {
+                  // Usar los estados locales para tiers y carriers
+                  const tiers = customTiers
+                  const items = waterfallItems
+                  const autoTierEnabledLocal = autoTierEnabled
+                  if (!items || items.length === 0) {
+                    return (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <p>No carriers configured for this waterfall yet.</p>
+                      </div>
+                    )
+                  }
+                  const tiersDisplay = []
+                  // Mostrar custom tiers primero
+                  tiers.forEach((tier, index) => {
+                    const tierCarriers = items.filter(item => 
+                      tier.carrierIds.includes(item.carrier.id)
+                    )
+                    if (tierCarriers.length > 0) {
+                      tiersDisplay.push(
+                        <div key={tier.id} className="border rounded-lg p-6 bg-muted/30">
+                          <div className="flex items-center gap-4 mb-4">
+                            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground font-bold">
+                              {tiersDisplay.length + 1}
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-lg">{tier.name}</h3>
+                              <p className="text-sm text-muted-foreground">Custom tier</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="gap-1">
+                                <Users className="h-3 w-3" />
+                                {tierCarriers.length} carrier{tierCarriers.length !== 1 ? 's' : ''}
+                              </Badge>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => openEditTierModal(tier)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Settings className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="overflow-x-auto">
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Carrier Name</TableHead>
+                                  <TableHead>MC Number</TableHead>
+                                  <TableHead>Contact Name</TableHead>
+                                  <TableHead>Contact Email</TableHead>
+                                  <TableHead>Rate</TableHead>
+                                  <TableHead>Response Window</TableHead>
+                                  <TableHead>Status</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {tierCarriers.map((item) => (
+                                  <TableRow key={item.id}>
+                                    <TableCell className="font-medium">{item.carrier.name}</TableCell>
+                                    <TableCell>{item.carrier.mcNumber}</TableCell>
+                                    <TableCell>{item.carrier.contactName || '-'}</TableCell>
+                                    <TableCell>{item.carrier.contactEmail || '-'}</TableCell>
+                                    <TableCell className="font-medium text-green-600">
+                                      $
+                                      {(item.carrier.rate || 0).toLocaleString("en-US", {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                      })}
+                                    </TableCell>
+                                    <TableCell>
+                                      <div className="flex items-center gap-2">
+                                        <Clock className="h-3 w-3 text-muted-foreground" />
+                                        <span className="text-sm">{item.responseWindow} min</span>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>
+                                      <Badge variant="default">Active</Badge>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </div>
+                      )
+                    }
+                  })
+                  // Carriers no asignados a custom tiers
+                  const carriersNotInCustomTiers = items.filter(item => 
+                    !tiers.some(tier => tier.carrierIds.includes(item.carrier.id))
+                  )
+                  if (autoTierEnabledLocal && carriersNotInCustomTiers.length > 0) {
+                    // Agrupar por rate
+                    const groupedByRate = carriersNotInCustomTiers.reduce((groups, item) => {
+                      const rate = item.carrier.rate || 0
+                      if (!groups[rate]) {
+                        groups[rate] = []
+                      }
+                      groups[rate].push(item)
+                      return groups
+                    }, {} as Record<number, typeof carriersNotInCustomTiers>)
+                    const sortedRateGroups = Object.entries(groupedByRate)
+                      .sort(([a], [b]) => parseFloat(a) - parseFloat(b))
+                    sortedRateGroups.forEach(([rate, items]) => {
+                      if (items.length > 1) {
+                        tiersDisplay.push(
+                          <div key={`auto-tier-${rate}`} className="border rounded-lg p-6 bg-muted/30">
+                            <div className="flex items-center gap-4 mb-4">
+                              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-500 text-white font-bold">
+                                {tiersDisplay.length + 1}
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="font-semibold text-lg">Auto-Tier ${rate}</h3>
+                                <p className="text-sm text-muted-foreground">Automatically grouped by rate</p>
+                              </div>
+                              <Badge variant="outline" className="gap-1">
+                                <Users className="h-3 w-3" />
+                                {items.length} carrier{items.length !== 1 ? 's' : ''}
+                              </Badge>
+                            </div>
+                            <div className="overflow-x-auto">
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>Carrier Name</TableHead>
+                                    <TableHead>MC Number</TableHead>
+                                    <TableHead>Contact Name</TableHead>
+                                    <TableHead>Contact Email</TableHead>
+                                    <TableHead>Rate</TableHead>
+                                    <TableHead>Response Window</TableHead>
+                                    <TableHead>Status</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {items.map((item) => (
+                                    <TableRow key={item.id}>
+                                      <TableCell className="font-medium">{item.carrier.name}</TableCell>
+                                      <TableCell>{item.carrier.mcNumber}</TableCell>
+                                      <TableCell>{item.carrier.contactName || '-'}</TableCell>
+                                      <TableCell>{item.carrier.contactEmail || '-'}</TableCell>
+                                      <TableCell className="font-medium text-green-600">
+                                        $
+                                        {(item.carrier.rate || 0).toLocaleString("en-US", {
+                                          minimumFractionDigits: 2,
+                                          maximumFractionDigits: 2,
+                                        })}
+                                      </TableCell>
+                                      <TableCell>
+                                        <div className="flex items-center gap-2">
+                                          <Clock className="h-3 w-3 text-muted-foreground" />
+                                          <span className="text-sm">{item.responseWindow} min</span>
+                                        </div>
+                                      </TableCell>
+                                      <TableCell>
+                                        <Badge variant="default">Active</Badge>
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          </div>
+                        )
+                      }
+                    })
+                    // Carriers individuales
+                    const individualCarriers = sortedRateGroups
+                      .filter(([rate, items]) => items.length === 1)
+                      .flatMap(([rate, items]) => items)
+                    if (individualCarriers.length > 0) {
+                      tiersDisplay.push(
+                        <div key="individual-carriers" className="border rounded-lg p-6 bg-muted/30">
+                          <div className="flex items-center gap-4 mb-4">
+                            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-purple-500 text-white font-bold">
+                              {tiersDisplay.length + 1}
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-lg">Individual Carriers</h3>
+                              <p className="text-sm text-muted-foreground">Carriers with unique rates or not grouped</p>
+                            </div>
+                            <Badge variant="outline" className="gap-1">
+                              <Users className="h-3 w-3" />
+                              {individualCarriers.length} carrier{individualCarriers.length !== 1 ? 's' : ''}
+                            </Badge>
+                          </div>
+                          <div className="overflow-x-auto">
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Carrier Name</TableHead>
+                                  <TableHead>MC Number</TableHead>
+                                  <TableHead>Contact Name</TableHead>
+                                  <TableHead>Contact Email</TableHead>
+                                  <TableHead>Rate</TableHead>
+                                  <TableHead>Response Window</TableHead>
+                                  <TableHead>Status</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {individualCarriers.map((item) => (
+                                  <TableRow key={item.id}>
+                                    <TableCell className="font-medium">{item.carrier.name}</TableCell>
+                                    <TableCell>{item.carrier.mcNumber}</TableCell>
+                                    <TableCell>{item.carrier.contactName || '-'}</TableCell>
+                                    <TableCell>{item.carrier.contactEmail || '-'}</TableCell>
+                                    <TableCell className="font-medium text-green-600">
+                                      $
+                                      {(item.carrier.rate || 0).toLocaleString("en-US", {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                      })}
+                                    </TableCell>
+                                    <TableCell>
+                                      <div className="flex items-center gap-2">
+                                        <Clock className="h-3 w-3 text-muted-foreground" />
+                                        <span className="text-sm">{item.responseWindow} min</span>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>
+                                      <Badge variant="default">Active</Badge>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </div>
+                      )
+                    }
+                  } else if (!autoTierEnabledLocal && carriersNotInCustomTiers.length > 0) {
+                    // Cuando autoTier está deshabilitado, mostrar todos los carriers restantes como individuales
+                    tiersDisplay.push(
+                      <div key="individual-carriers" className="border rounded-lg p-6 bg-muted/30">
+                        <div className="flex items-center gap-4 mb-4">
+                          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-purple-500 text-white font-bold">
+                            {tiersDisplay.length + 1}
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg">Individual Carriers</h3>
+                            <p className="text-sm text-muted-foreground">Carriers not in custom tiers</p>
+                          </div>
+                          <Badge variant="outline" className="gap-1">
+                            <Users className="h-3 w-3" />
+                            {carriersNotInCustomTiers.length} carrier{carriersNotInCustomTiers.length !== 1 ? 's' : ''}
+                          </Badge>
+                        </div>
+                        <div className="overflow-x-auto">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Carrier Name</TableHead>
+                                <TableHead>MC Number</TableHead>
+                                <TableHead>Contact Name</TableHead>
+                                <TableHead>Contact Email</TableHead>
+                                <TableHead>Rate</TableHead>
+                                <TableHead>Response Window</TableHead>
+                                <TableHead>Status</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {carriersNotInCustomTiers.map((item) => (
+                                <TableRow key={item.id}>
+                                  <TableCell className="font-medium">{item.carrier.name}</TableCell>
+                                  <TableCell>{item.carrier.mcNumber}</TableCell>
+                                  <TableCell>{item.carrier.contactName || '-'}</TableCell>
+                                  <TableCell>{item.carrier.contactEmail || '-'}</TableCell>
+                                  <TableCell className="font-medium text-green-600">
+                                    $
+                                    {(item.carrier.rate || 0).toLocaleString("en-US", {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })}
+                                  </TableCell>
+                                  <TableCell>
+                                    <div className="flex items-center gap-2">
+                                      <Clock className="h-3 w-3 text-muted-foreground" />
+                                      <span className="text-sm">{item.responseWindow} min</span>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Badge variant="default">Active</Badge>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </div>
+                    )
+                  }
+                  // Mostrar info de auto-tier
+                  if (tiersDisplay.length > 0) {
+                    tiersDisplay.unshift(
+                      <div key="tier-info" className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-3 h-3 rounded-full ${autoTierEnabledLocal ? 'bg-blue-500' : 'bg-gray-400'}`}></div>
+                            <span className="text-sm font-medium">
+                              Auto-Tier Grouping: {autoTierEnabledLocal ? 'Enabled' : 'Disabled'}
+                            </span>
+                          </div>
+                          {tiers.length > 0 && (
+                            <Badge variant="secondary" className="gap-1 ml-4">
+                              <Users className="h-3 w-3" />
+                              {tiers.length} custom tier{tiers.length !== 1 ? 's' : ''}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {autoTierEnabledLocal 
+                            ? 'Carriers with the same rate are automatically grouped together'
+                            : 'All carriers are shown individually unless assigned to custom tiers'
+                          }
+                        </p>
+                      </div>
+                    )
+                  }
+                  return tiersDisplay.length > 1 ? tiersDisplay : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p>No carriers configured for this waterfall yet.</p>
+                    </div>
+                  )
+                })()}
+              </CardContent>
+            </Card>
+            {/* Modal de creación/edición de tier SOLO para esta vista */}
+            <Dialog open={showCreateTierModal} onOpenChange={setShowCreateTierModal}>
+              <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingTier ? 'Edit Tier' : 'Create New Tier'}
+                  </DialogTitle>
+                  <DialogDescription>
+                    {editingTier 
+                      ? 'Modify the tier name and carrier assignments' 
+                      : 'Create a custom tier by grouping carriers together'
+                    }
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="space-y-6">
+                  {/* Tier Name */}
+                  <div className="space-y-2">
+                    <Label htmlFor="tier-name">Tier Name</Label>
+                    <Input
+                      id="tier-name"
+                      placeholder="Enter tier name (e.g., Premium Carriers)"
+                      value={newTierName}
+                      onChange={(e) => setNewTierName(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Carrier Selection */}
+                  <div className="space-y-3">
+                    <Label>Select Carriers for this Tier</Label>
+                    <div className="border rounded-lg p-4 max-h-96 overflow-y-auto">
+                      {waterfallItems.length === 0 ? (
+                        <p className="text-center py-8 text-muted-foreground">
+                          No carriers available. Add carriers to the waterfall first.
+                        </p>
+                      ) : (
+                        <div className="space-y-2">
+                          {waterfallItems.map((item) => {
+                            const isSelected = selectedCarriersForTier.includes(item.carrier.id)
+                            const isAssignedToOtherTier = editingTier 
+                              ? customTiers.some(tier => 
+                                  tier.id !== editingTier.id && tier.carrierIds.includes(item.carrier.id)
+                                )
+                              : customTiers.some(tier => 
+                                  tier.carrierIds.includes(item.carrier.id)
+                                )
+                            
+                            return (
+                              <div 
+                                key={item.carrier.id} 
+                                className={`flex items-center space-x-3 p-3 rounded-lg border ${
+                                  isAssignedToOtherTier 
+                                    ? 'bg-gray-50 border-gray-200' 
+                                    : isSelected 
+                                      ? 'bg-blue-50 border-blue-200' 
+                                      : 'bg-white border-gray-200 hover:bg-gray-50'
+                                }`}
+                              >
+                                <Checkbox
+                                  id={`carrier-${item.carrier.id}`}
+                                  checked={isSelected}
+                                  disabled={isAssignedToOtherTier}
+                                  onCheckedChange={() => toggleCarrierSelection(item.carrier.id)}
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <p className={`font-medium ${isAssignedToOtherTier ? 'text-gray-500' : ''}`}>
+                                        {item.carrier.name}
+                                      </p>
+                                      <p className={`text-sm ${isAssignedToOtherTier ? 'text-gray-400' : 'text-muted-foreground'}`}>
+                                        {item.carrier.mcNumber}
+                                      </p>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className={`font-medium ${isAssignedToOtherTier ? 'text-gray-500' : 'text-green-600'}`}>
+                                        ${(item.carrier.rate || 0).toLocaleString()}
+                                      </p>
+                                      <p className={`text-sm ${isAssignedToOtherTier ? 'text-gray-400' : 'text-muted-foreground'}`}>
+                                        {item.responseWindow} min
+                                      </p>
+                                    </div>
+                                  </div>
+                                  {isAssignedToOtherTier && (
+                                    <p className="text-xs text-gray-500 mt-1">
+                                      Already assigned to another tier
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                    {selectedCarriersForTier.length > 0 && (
+                      <p className="text-sm text-muted-foreground">
+                        {selectedCarriersForTier.length} carrier{selectedCarriersForTier.length !== 1 ? 's' : ''} selected
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <DialogFooter className="gap-2">
+                  <Button variant="outline" onClick={cancelTierModal}>
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={editingTier ? updateCustomTier : createCustomTier}
+                    disabled={!newTierName.trim() || selectedCarriersForTier.length === 0}
+                  >
+                    {editingTier ? 'Update Tier' : 'Create Tier'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </TabsContent>
+
+          <TabsContent value="execution" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl text-dts-darkblue">Execution Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Current Status and Controls */}
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 bg-muted/50 rounded-lg">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-muted-foreground">Current Status</Label>
+                    <div className="flex items-center gap-3">
+                      <Clock className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <p className="font-semibold text-lg">{selectedWaterfallForDetails.status}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {getExecutionStatusMessage(selectedWaterfallForDetails.status)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    {selectedWaterfallForDetails.status === "Paused" && (
+                      <Button className="gap-2 bg-dts-blue hover:bg-dts-darkblue text-white">
+                        <Play className="h-4 w-4" />
+                        Resume Waterfall
+                      </Button>
+                    )}
+                    <Button 
+                      variant="outline" 
+                      className="gap-2 bg-transparent"
+                      onClick={() => setShowLogsModal(true)}
+                    >
+                      <Eye className="h-4 w-4" />
+                      View Logs
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Execution Metrics */}
+                {selectedWaterfallForDetails.status !== "Not Triggered" && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <p className="text-2xl font-bold text-blue-600">{mockExecutionData.totalLoadsProcessed}</p>
+                          <p className="text-sm text-muted-foreground">Total Loads Processed</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <p className="text-2xl font-bold text-green-600">{mockExecutionData.successfulAssignments}</p>
+                          <p className="text-sm text-muted-foreground">Successfully Assigned</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <p className="text-2xl font-bold text-yellow-600">{mockExecutionData.pendingResponses}</p>
+                          <p className="text-sm text-muted-foreground">Pending Responses</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <p className="text-2xl font-bold text-purple-600">{mockExecutionData.averageResponseTime}</p>
+                          <p className="text-sm text-muted-foreground">Avg Response Time</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Current Load Processing */}
+                {selectedWaterfallForDetails.status === "Triggered" && mockExecutionData.currentLoad && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Currently Processing</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-semibold">Load ID: {mockExecutionData.currentLoad}</p>
+                            <p className="text-sm text-muted-foreground">Active in Tier {mockExecutionData.currentTier}</p>
+                          </div>
+                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                            Processing
+                          </Badge>
+                        </div>
+                        
+                        {/* Current Carrier Responses */}
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium">Carrier Responses</Label>
+                          <div className="space-y-2">
+                            {mockCurrentResponses.map((response) => (
+                              <div key={response.carrierId} className="flex items-center justify-between p-3 border rounded-lg">
+                                <div>
+                                  <p className="font-medium">{response.carrierName}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    Offer sent: {new Date(response.offerSentTime).toLocaleTimeString()}
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <Badge 
+                                    variant={response.status === 'pending' ? 'outline' : 'default'}
+                                    className={
+                                      response.status === 'pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
+                                      response.status === 'accepted' ? 'bg-green-50 text-green-700 border-green-200' :
+                                      'bg-red-50 text-red-700 border-red-200'
+                                    }
+                                  >
+                                    {response.status === 'pending' ? 'Waiting' : response.status}
+                                  </Badge>
+                                  {response.status === 'pending' && response.timeRemaining && (
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      {response.timeRemaining} min remaining
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Recent Activity */}
+                {selectedWaterfallForDetails.status !== "Not Triggered" && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Recent Activity</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {mockExecutionLogs.slice(-5).reverse().map((log) => (
+                          <div key={log.id} className="flex items-start gap-3 p-3 border rounded-lg">
+                            <div className={`w-2 h-2 rounded-full mt-2 ${
+                              log.type === 'success' ? 'bg-green-500' :
+                              log.type === 'warning' ? 'bg-yellow-500' :
+                              log.type === 'error' ? 'bg-red-500' :
+                              'bg-blue-500'
+                            }`} />
+                            <div className="flex-1">
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <p className="font-medium text-sm">{log.action}</p>
+                                  <p className="text-xs text-muted-foreground mt-1">{log.details}</p>
+                                  {log.carrierName && (
+                                    <p className="text-xs text-blue-600 mt-1">Carrier: {log.carrierName}</p>
+                                  )}
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                  {new Date(log.timestamp).toLocaleTimeString()}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        <div className="text-center pt-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => setShowLogsModal(true)}
+                          >
+                            View Complete Log History
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        {/* Active and Past Loads */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl text-dts-darkblue">Active and Past Loads</CardTitle>
+            <CardDescription>
+              {latestLoads.length === 0
+                ? "No loads have been processed through this waterfall yet"
+                : `Processed loads for this waterfall, sorted by oldest first (FIFO). Shows expected vs actual pickup and delivery times.`}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {latestLoads.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <p className="text-lg font-medium">No processed loads</p>
+                <p className="text-sm">This waterfall hasn't processed any loads yet.</p>
+                {selectedWaterfallForDetails.status === "Not Triggered" && (
+                  <p className="text-sm mt-2">Trigger the waterfall to start processing loads.</p>
+                )}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Load ID</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>[EST] Pickup Date/Time</TableHead>
+                      <TableHead>Pickup Date/Time</TableHead>
+                      <TableHead>[EST] Delivery Date/Time</TableHead>
+                      <TableHead>Actual Delivery Date/Time</TableHead>
+                      <TableHead>Equipment</TableHead>
+                      <TableHead>Assigned Carrier</TableHead>
+                      <TableHead>Rate</TableHead>
+                      <TableHead>Booking Date/Time</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {latestLoads.map((load) => (
+                      <TableRow key={load.id}>
+                        <TableCell className="font-medium">{load.id}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={load.status === "Completed" ? "default" : "secondary"}
+                            className={
+                              load.status === "Completed" ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"
+                            }
+                          >
+                            {load.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            <div>{load.pickupDateTimeExpected.split(" ")[0]}</div>
+                            <div className="text-muted-foreground">{load.pickupDateTimeExpected.split(" ")[1]}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            <div>{load.pickupDateTimeActual.split(" ")[0]}</div>
+                            <div className="text-muted-foreground">{load.pickupDateTimeActual.split(" ")[1]}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            <div>{load.deliveryDateTimeExpected.split(" ")[0]}</div>
+                            <div className="text-muted-foreground">{load.deliveryDateTimeExpected.split(" ")[1]}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            <div>{load.deliveryDateTimeActual.split(" ")[0]}</div>
+                            <div className="text-muted-foreground">{load.deliveryDateTimeActual.split(" ")[1]}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{load.equipmentType}</Badge>
+                        </TableCell>
+                        <TableCell className="font-medium">{load.assignedCarrier}</TableCell>
+                        <TableCell className="font-medium text-green-600">
+                          $
+                          {load.finalRate.toLocaleString("en-US", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                        </TableCell>
+                        <TableCell className="text-sm">{load.bookingDate}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Logs Modal SOLO para esta vista */}
+        {isClient && (
+          <Dialog open={showLogsModal} onOpenChange={setShowLogsModal}>
+            <DialogContent className="max-w-6xl max-h-[85vh] flex flex-col">
+              <DialogHeader>
+                <DialogTitle className="text-xl">Waterfall Execution Logs</DialogTitle>
+                <DialogDescription>
+                  Complete execution history for {selectedWaterfallForDetails?.originZip} → {selectedWaterfallForDetails?.destinationZip} waterfall
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex-1 overflow-y-auto min-h-[300px] max-h-[60vh] pr-2">
+                <div className="space-y-3">
+                  {mockExecutionLogs.map((log) => (
+                    <div key={log.id} className="border rounded-lg p-4 hover:bg-muted/30 transition-colors">
+                      <div className="flex items-start gap-3">
+                        <div className={`w-3 h-3 rounded-full mt-1.5 flex-shrink-0 ${
+                          log.type === 'success' ? 'bg-green-500' :
+                          log.type === 'warning' ? 'bg-yellow-500' :
+                          log.type === 'error' ? 'bg-red-500' :
+                          'bg-blue-500'
+                        }`} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h4 className="font-semibold text-sm">{log.action}</h4>
+                                {log.loadId && (
+                                  <Badge variant="outline" className="text-xs">
+                                    {log.loadId}
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-sm text-muted-foreground mb-2 break-words">
+                                {log.details}
+                              </p>
+                              {log.carrierName && (
+                                <div className="flex items-center gap-2 mb-2">
+                                  <span className="text-xs font-medium text-blue-600">
+                                    Carrier: {log.carrierName}
+                                  </span>
+                                  {log.carrierId && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      ID: {log.carrierId}
+                                    </Badge>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                            <div className="text-right flex-shrink-0">
+                              <div className="text-xs text-muted-foreground">
+                                {new Date(log.timestamp).toLocaleDateString()}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {new Date(log.timestamp).toLocaleTimeString()}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {mockExecutionLogs.length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p className="text-lg font-medium">No execution logs yet</p>
+                      <p className="text-sm">Logs will appear here once the waterfall starts processing loads</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <DialogFooter className="mt-4">
+                <Button variant="outline" onClick={() => setShowLogsModal(false)}>
+                  Close
+                </Button>
+                {/* <Button 
+                  onClick={() => {
+                    // Mock export functionality
+                    console.log('Exporting logs...')
+                  }}
+                  className="gap-2"
+                >
+                  <Eye className="h-4 w-4" />
+                  Export Logs
+                </Button> */}
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
+      </div>
+    )
+  }
+
+  // Drag and drop functions
+  const handleDragStart = (e: React.DragEvent, itemId: string) => {
+    setDraggedItemId(itemId)
+    e.dataTransfer.effectAllowed = "move"
+  }
+
+  const handleDragOver = (e: React.DragEvent, itemId: string) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = "move"
+    setDragOverItemId(itemId)
+  }
+
+  const handleDragLeave = () => {
+    setDragOverItemId(null)
+  }
+
+  const handleDrop = (e: React.DragEvent, targetItemId: string) => {
+    e.preventDefault()
+    
+    if (!draggedItemId || draggedItemId === targetItemId) {
+      setDraggedItemId(null)
+      setDragOverItemId(null)
+      return
+    }
+
+    const draggedIndex = waterfallItems.findIndex(item => item.id === draggedItemId)
+    const targetIndex = waterfallItems.findIndex(item => item.id === targetItemId)
+
+    if (draggedIndex === -1 || targetIndex === -1) return
+
+    const newItems = [...waterfallItems]
+    const [draggedItem] = newItems.splice(draggedIndex, 1)
+    newItems.splice(targetIndex, 0, draggedItem)
+
+    setWaterfallItems(newItems)
+    // Don't save to localStorage here - only when "Save Changes" is clicked
+    setDraggedItemId(null)
+    setDragOverItemId(null)
+  }
+
+  const handleDragEnd = () => {
+    setDraggedItemId(null)
+    setDragOverItemId(null)
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Carrier Waterfalls</h1>
+        <p className="text-gray-600 mt-2">Create and configure carrier waterfall dispatch sequences</p>
+      </div>
+
+      {currentStep === "lane-creation" && (
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">Create new waterfall</CardTitle>
+              <CardDescription>
+                Begin by selecting the origin, destination, and equipment type to define the Lane
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="border border-gray-200 rounded-lg p-4 bg-gray-50/30">
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Lane</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="origin-zip">Origin ZIP</Label>
+                    <Input
+                      id="origin-zip"
+                      placeholder="Enter origin ZIP"
+                      value={originZip}
+                      onChange={(e) => setOriginZip(e.target.value)}
+                    />
+                    {originZip && getLocationFromZip(originZip) && (
+                      <p className="text-sm text-gray-600 mt-1">
+                        {getLocationFromZip(originZip)?.city}, {getLocationFromZip(originZip)?.state}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <Label htmlFor="destination-zip">Destination ZIP</Label>
+                    <Input
+                      id="destination-zip"
+                      placeholder="Enter destination ZIP"
+                      value={destinationZip}
+                      onChange={(e) => setDestinationZip(e.target.value)}
+                    />
+                    {destinationZip && getLocationFromZip(destinationZip) && (
+                      <p className="text-sm text-gray-600 mt-1">
+                        {getLocationFromZip(destinationZip)?.city}, {getLocationFromZip(destinationZip)?.state}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <Label htmlFor="equipment-type">Equipment Type</Label>
+                    <Select value={equipmentType} onValueChange={setEquipmentType}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select equipment" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Dry Van">Dry Van</SelectItem>
+                        <SelectItem value="Refrigerated">Refrigerated</SelectItem>
+                        <SelectItem value="Flatbed">Flatbed</SelectItem>
+                        <SelectItem value="Tanker">Tanker</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-center pt-4">
+                <Button
+                  onClick={createLane}
+                  disabled={!originZip || !destinationZip || !equipmentType}
+                  className="px-8"
+                >
+                  Continue
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <CardTitle>All waterfalls</CardTitle>
+                  <CardDescription>
+                    {filteredWaterfalls.length === 0
+                      ? "Monitor and manage your existing waterfall lanes (showing 0 of 0)"
+                      : `Monitor and manage your existing waterfall lanes (showing ${waterfallStartIndex + 1}-${Math.min(waterfallEndIndex, filteredWaterfalls.length)} of ${filteredWaterfalls.length})`
+                    }
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="status-filter" className="text-sm font-medium">
+                      Filter by Status:
+                    </Label>
+                    <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
+                      <SelectTrigger className="w-40">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        <SelectItem value="Triggered">Triggered</SelectItem>
+                        <SelectItem value="Not Triggered">Not Triggered</SelectItem>
+                        <SelectItem value="Paused">Paused</SelectItem>
+                        <SelectItem value="Completed">Completed</SelectItem>
+                        <SelectItem value="Draft">Draft</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {totalWaterfallPages > 1 && (
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleWaterfallPreviousPage}
+                        disabled={waterfallCurrentPage === 1}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Previous
+                      </Button>
+                      <span className="text-sm text-gray-600">
+                        Page {waterfallCurrentPage} of {totalWaterfallPages}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleWaterfallNextPage}
+                        disabled={waterfallCurrentPage === totalWaterfallPages}
+                      >
+                        Next
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>ID</TableHead>
+                      <TableHead>Lane</TableHead>
+                      <TableHead>Equipment</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Booked Loads</TableHead>
+                      <TableHead>Creation Date</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {currentWaterfalls.map((lane) => (
+                      <TableRow key={lane.id}>
+                        <TableCell>
+                          <span className="font-medium">{lane.id}</span>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">
+                              {lane.originZip} → {lane.destinationZip}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {(() => {
+                                const originLoc = getLocationFromZip(lane.originZip)
+                                const destLoc = getLocationFromZip(lane.destinationZip)
+                                return `${originLoc ? `${originLoc.city}, ${originLoc.state}` : lane.originZip} → ${destLoc ? `${destLoc.city}, ${destLoc.state}` : lane.destinationZip}`
+                              })()}
+                            </p>
+                          </div>
+                                               </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{lane.equipment}</Badge>
+                        </TableCell>
+                        <TableCell>{getStatusBadge(lane.status)}</TableCell>
+                        <TableCell>
+                          <span className="font-medium">
+                            {lane.status === "Not Triggered" ? "-" : lane.quotedLoads}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-sm">{lane.creationDate}</span>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-8 w-8 p-0 bg-transparent"
+                              onClick={() => handleViewWaterfallDetails(lane)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            {lane.status === "Triggered" && (
+                              <Button size="sm" variant="outline" className="h-8 w-8 p-0 bg-transparent">
+                                <Pause className="h-4 w-4" />
+                              </Button>
+                            )}
+                            {lane.status === "Paused" && (
+                              <Button size="sm" variant="outline" className="h-8 w-8 p-0 bg-transparent">
+                                <Play className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      )}
+
+      {currentStep === "waterfall-config" && currentLane && (
+        <>
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setCurrentStep("lane-creation")}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Waterfalls
+              </Button>
+              <Button
+                onClick={saveWaterfall}
+                disabled={waterfallItems.length === 0}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+              >
+                <Save className="h-4 w-4" />
+                Waterfall ready!
+              </Button>
+            </div>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100">
+                  <MapPin className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl lg:text-2xl font-bold text-gray-900">Lane Configuration</CardTitle>
+                  <CardDescription className="text-base">Configure your waterfall for this lane</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-100">
+                <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Origin</Label>
+                    <div className="space-y-1">
+                      <div className="text-lg font-bold text-gray-900">{currentLane.originZip}</div>
+                      <div className="text-xs text-gray-600">
+                        {getLocationFromZip(currentLane.originZip)?.city}, {getLocationFromZip(currentLane.originZip)?.state}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Destination</Label>
+                    <div className="space-y-1">
+                      <div className="text-lg font-bold text-gray-900">{currentLane.destinationZip}</div>
+                      <div className="text-xs text-gray-600">
+                        {getLocationFromZip(currentLane.destinationZip)?.city}, {getLocationFromZip(currentLane.destinationZip)?.state}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Equipment</Label>
+                    <div>
+                      <Badge className="bg-green-100 text-green-800 font-medium">{currentLane.equipment}</Badge>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Quoted Loads</Label>
+                    <div className="text-lg font-bold text-gray-900">{currentLane.quotedLoads}</div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide">% Acceptance</Label>
+                    <div className="text-lg font-bold text-gray-900">80%</div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide">% On time pickup</Label>
+                    <div className="text-lg font-bold text-gray-900">85%</div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-gray-500 uppercase tracking-wide">% On time delivery</Label>
+                    <div className="text-lg font-bold text-gray-900">79%</div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {renderWaterfallConfiguration(true)}
+
+          {/* Carrier Search Modal */}
+          <Dialog open={showCarrierSearch} onOpenChange={setShowCarrierSearch}>
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Search and Select Carrier</DialogTitle>
+                <DialogDescription>
+                  Search for carriers by name or MC number and select one to add to your waterfall.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <Input
+                    placeholder="Search by carrier name or MC number..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button variant="outline">Search</Button>
+                </div>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Carrier Name</TableHead>
+                        <TableHead>MC Number</TableHead>
+                        <TableHead>Contact Email</TableHead>
+                        <TableHead>Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredCarriers.map((carrier) => (
+                        <TableRow key={carrier.id}>
+                          <TableCell className="font-medium">{carrier.name}</TableCell>
+                          <TableCell>{carrier.mcNumber}</TableCell>
+                          <TableCell>{carrier.contactEmail}</TableCell>
+                          <TableCell>
+                            <Button onClick={() => selectCarrier(carrier)} size="sm">
+                              Select
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowCarrierSearch(false)}>
+                  Cancel
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Carrier Details Modal */}
+          <Dialog open={showCarrierDetails} onOpenChange={setShowCarrierDetails}>
+            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Review and Update Carrier Details</DialogTitle>
+                <DialogDescription>
+                  Review the carrier information and update any details before adding to the waterfall.
+                </DialogDescription>
+              </DialogHeader>
+              {editingCarrier && (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Carrier Name</Label>
+                      <Input
+                        value={editingCarrier.name}
+                        onChange={(e) => setEditingCarrier({ ...editingCarrier, name: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Carrier MC Number</Label>
+                      <Input
+                        value={editingCarrier.mcNumber}
+                        onChange={(e) => setEditingCarrier({ ...editingCarrier, mcNumber: e.target.value })}
+                        required
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Main Contact Name</Label>
+                      <Input
+                        value={editingCarrier.contactName || ""}
+                        onChange={(e) => setEditingCarrier({ ...editingCarrier, contactName: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Main Contact Email</Label>
+                      <Input
+                        type="email"
+                        value={editingCarrier.contactEmail}
+                        onChange={(e) => setEditingCarrier({ ...editingCarrier, contactEmail: e.target.value })}
+                        required
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Secondary Contact Name</Label>
+                      <Input
+                        value={editingCarrier.secondaryContactName || ""}
+                        onChange={(e) => setEditingCarrier({ ...editingCarrier, secondaryContactName: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Secondary Contact Email</Label>
+                      <Input
+                        type="email"
+                        value={editingCarrier.secondaryContactEmail || ""}
+                        onChange={(e) => setEditingCarrier({ ...editingCarrier, secondaryContactEmail: e.target.value })}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Daily Capacity</Label>
+                      <Button
+                        variant="outline"
+                        onClick={() => openAvailabilityModal()}
+                        className="w-full justify-start"
+                      >
+                        {(editingCarrier.availability?.length || 0) > 0
+                          ? `${editingCarrier.availability?.length} rule(s) configured`
+                          : "Configure daily capacity"}
+                      </Button>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Carrier MC Number</Label>
+                      <Input
+                        value={editingCarrier.carrierMcNumber || editingCarrier.mcNumber}
+                        onChange={(e) => setEditingCarrier({ ...editingCarrier, carrierMcNumber: e.target.value })}
+                        required
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Assigned Rep</Label>
+                      <Select
+                        value={editingCarrier.assignedRep || ""}
+                        onValueChange={(value) => setEditingCarrier({ ...editingCarrier, assignedRep: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select assigned rep" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Sarah Johnson">Sarah Johnson</SelectItem>
+                          <SelectItem value="Mike Wilson">Mike Wilson</SelectItem>
+                          <SelectItem value="Tom Anderson">Tom Anderson</SelectItem>
+                          <SelectItem value="Lisa Rodriguez">Lisa Rodriguez</SelectItem>
+                          <SelectItem value="David Chen">David Chen</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <DialogFooter>
+                <Button variant="outline" onClick={cancelCarrierDetails}>
+                  Cancel
+                </Button>
+                <Button onClick={saveCarrierDetails}>Add to Waterfall</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Availability Modal */}
+          <Dialog open={showAvailabilityModal} onOpenChange={setShowAvailabilityModal}>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Edit Daily Capacity</DialogTitle>
+                <DialogDescription>Configure daily capacity rules for this carrier.</DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-6">
+                {/* Add New Rule Section */}
+                <Card className="border-2">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Add Capacity Rule</CardTitle>
+                    <CardDescription>Select days and set daily truck capacity</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium text-muted-foreground">Select Days</Label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {daysOfWeek.map((day) => (
+                          <div key={day} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={day}
+                              checked={selectedDays.includes(day)}
+                              onCheckedChange={() => handleDayToggle(day)}
+                            />
+                            <Label htmlFor={day} className="text-sm font-medium cursor-pointer">
+                              {day}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-muted-foreground">Daily Capacity</Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="number"
+                          value={dailyCapacity}
+                          onChange={(e) => setDailyCapacity(Math.max(1, parseInt(e.target.value) || 1))}
+                          className="w-24"
+                          min="1"
+                        />
+                        <span className="text-sm text-muted-foreground">trucks per day</span>
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      onClick={addDailyCapacityRule}
+                      disabled={selectedDays.length === 0}
+                      className="w-full"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Rule
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Current Rules Section */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Current Capacity Rules</CardTitle>
+                    <CardDescription>
+                      {tempAvailability.length === 0 
+                        ? "No capacity rules configured" 
+                        : `${tempAvailability.length} rule(s) configured`
+                      }
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {tempAvailability.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <p className="text-sm">No capacity rules configured yet.</p>
+                        <p className="text-xs mt-1">Add rules above to set daily truck limits.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {tempAvailability.map((rule) => (
+                          <div key={rule.id} className="border rounded-lg p-4 bg-muted/30">
+                            <div className="flex items-center justify-between">
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                  <Clock className="h-4 w-4 text-muted-foreground" />
+                                  <span className="font-medium text-sm">
+                                    {rule.days.join(", ")}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Users className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-sm text-muted-foreground">
+                                    {rule.capacity} truck{rule.capacity !== 1 ? 's' : ''} per day
+                                  </span>
+                                </div>
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => removeDailyCapacityRule(rule.id)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              <DialogFooter className="gap-2">
+                <Button variant="outline" onClick={cancelDailyCapacity}>
+                  Cancel
+                </Button>
+                <Button onClick={saveDailyCapacity}>
+                  Save Changes
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* View Capacity Modal (Read-only) */}
+          <Dialog open={showViewCapacityModal} onOpenChange={setShowViewCapacityModal}>
+            <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Daily Capacity Rules</DialogTitle>
+                <DialogDescription>
+                  View daily capacity rules configured for {viewingCarrierCapacity?.name}
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4">
+                {/* Carrier Info */}
+                <Card className="border-2">
+                  <CardContent className="pt-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-muted-foreground">Carrier:</span>
+                        <span className="font-medium">{viewingCarrierCapacity?.name}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-muted-foreground">MC Number:</span>
+                        <span className="font-medium">{viewingCarrierCapacity?.mcNumber}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Capacity Rules */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Configured Rules</CardTitle>
+                    <CardDescription>
+                      {viewingCarrierCapacity?.availability?.length === 0 
+                        ? "No capacity rules configured" 
+                        : `${viewingCarrierCapacity?.availability?.length} rule(s) configured`
+                      }
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {!viewingCarrierCapacity?.availability || viewingCarrierCapacity.availability.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <p className="text-sm">No capacity rules configured for this carrier.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {viewingCarrierCapacity.availability.map((rule) => (
+                          <div key={rule.id} className="border rounded-lg p-4 bg-muted/30">
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                <Clock className="h-4 w-4 text-muted-foreground" />
+                                <span className="font-medium text-sm">
+                                  {rule.days.join(", ")}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Users className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-sm text-muted-foreground">
+                                  {rule.capacity} truck{rule.capacity !== 1 ? 's' : ''} per day
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              <DialogFooter>
+                <Button onClick={() => setShowViewCapacityModal(false)}>
+                  Close
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Confirmation Modal */}
+          <Dialog open={showConfirmationModal} onOpenChange={setShowConfirmationModal}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-xl flex items-center gap-2">
+                  <Save className="h-5 w-5 text-green-600" />
+                  {isEditingWaterfall ? "Waterfall Updated!" : "Waterfall Ready!"}
+                </DialogTitle>
+                <DialogDescription>
+                  {isEditingWaterfall 
+                    ? "Your waterfall configuration has been updated successfully. The changes have been saved." 
+                    : "Your waterfall is now ready and has been saved successfully. It will appear in your waterfalls list with \"Draft\" status."
+                  }
+                  {autoTierEnabled && " Auto-tier grouping by rate was applied to organize carriers."}
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="flex items-center justify-center py-4">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                  <Save className="h-8 w-8 text-green-600" />
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button onClick={handleConfirmSave} className="w-full">
+                  Continue
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
+    </div>
+  )
+}

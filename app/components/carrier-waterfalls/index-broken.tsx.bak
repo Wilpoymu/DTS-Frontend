@@ -1,0 +1,117 @@
+"use client"
+
+import { useWaterfall } from "./shared/hooks/useWaterfall"
+import { CarrierWaterfallsProps } from "./shared/types"
+import LaneCreationView from "./lane-creation/LaneCreationView"
+// Import other views as we create them
+// import WaterfallConfigView from "./waterfall-config/WaterfallConfigView"
+// import WaterfallDetailsView from "./waterfall-details/WaterfallDetailsView"
+
+export default function CarrierWaterfalls(props: CarrierWaterfallsProps = {}) {
+  console.log('CarrierWaterfalls rendering...', { props })
+  
+  // Temporarily bypass the hook to test basic rendering
+  return (
+    <div className="p-8 space-y-4 min-h-screen">
+      <h1 className="text-3xl font-bold text-gray-900">🚀 Carrier Waterfalls - Basic Test</h1>
+      <div className="bg-green-100 p-4 rounded-lg border border-green-300">
+        <p className="text-xl font-semibold text-green-800">✅ SUCCESS: Component is rendering!</p>
+        <p className="text-green-700">If you see this, the component wrapper is working.</p>
+        <p className="text-sm text-green-600 mt-2">Props received: <code>{JSON.stringify(props)}</code></p>
+      </div>
+      
+      <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-300">
+        <p className="text-yellow-800">🔧 Next: Testing hooks...</p>
+      </div>
+    </div>
+  )
+  
+  /* Original hook-based code - temporarily disabled
+  const {
+    currentStep,
+    setCurrentStep,
+    currentLane,
+    setCurrentLane,
+    savedWaterfalls,
+    handleViewWaterfallDetails
+  } = useWaterfall(props)
+
+  console.log('CarrierWaterfalls state:', { currentStep, savedWaterfalls })
+
+  const handleCreateLane = (lane: any) => {
+    setCurrentLane(lane)
+    setCurrentStep("waterfall-config")
+  }
+
+  switch (currentStep) {
+    case "lane-creation":
+      return (
+        <div className="p-8 space-y-4">
+          <h1 className="text-3xl font-bold text-gray-900">Carrier Waterfalls - Refactored</h1>
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <p className="text-lg">✅ Component is rendering successfully!</p>
+            <p>Current step: <span className="font-semibold">{currentStep}</span></p>
+            <p>Saved waterfalls: <span className="font-semibold">{savedWaterfalls.length}</span></p>
+            <p>Props: <code className="bg-gray-100 px-2 py-1 rounded">{JSON.stringify(props)}</code></p>
+          </div>
+          
+          <div className="mt-8">
+            <button 
+              onClick={() => setCurrentStep("waterfall-config")}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Test Navigation to Config
+            </button>
+          </div>
+          
+          {/* Temporarily comment out LaneCreationView to test */}
+          {/*
+          <LaneCreationView
+            savedWaterfalls={savedWaterfalls}
+            onCreateLane={handleCreateLane}
+            onViewWaterfallDetails={handleViewWaterfallDetails}
+          />
+          */}
+        </div>
+      )
+    
+    case "waterfall-config":
+      // TODO: Replace with WaterfallConfigView component
+      return (
+        <div className="p-8">
+          <h2 className="text-2xl font-bold mb-4">Waterfall Configuration</h2>
+          <p>This view is being refactored...</p>
+          <button 
+            onClick={() => setCurrentStep("lane-creation")}
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+          >
+            Back to Lane Creation
+          </button>
+        </div>
+      )
+    
+    case "waterfall-details":
+      // TODO: Replace with WaterfallDetailsView component
+      return (
+        <div className="p-8">
+          <h2 className="text-2xl font-bold mb-4">Waterfall Details</h2>
+          <p>This view is being refactored...</p>
+          <button 
+            onClick={() => setCurrentStep("lane-creation")}
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+          >
+            Back to Lane Creation
+          </button>
+        </div>
+      )
+    
+    default:
+      return (
+        <LaneCreationView
+          savedWaterfalls={savedWaterfalls}
+          onCreateLane={handleCreateLane}
+          onViewWaterfallDetails={handleViewWaterfallDetails}
+        />
+      )
+  }
+}
