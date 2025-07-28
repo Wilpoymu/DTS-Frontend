@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Loader2 } from "lucide-react"
-import { useCarriers } from "@/hooks/use-carriers"
+import { useCarriersAdaptive } from "@/hooks/use-carriers-adaptive"
 import { CreateCarrierRequest } from "@/services/index"
 
 interface CreateCarrierModalProps {
@@ -21,7 +21,6 @@ export default function CreateCarrierModal({ trigger, onCarrierCreated }: Create
   const [formData, setFormData] = useState<CreateCarrierRequest>({
     name: "",
     mc: "",
-    status: "ACTIVE",
     primaryContact: {
       name: "",
       phone: "",
@@ -35,7 +34,7 @@ export default function CreateCarrierModal({ trigger, onCarrierCreated }: Create
   })
   const [hasSecondaryContact, setHasSecondaryContact] = useState(false)
 
-  const { addCarrier } = useCarriers()
+  const { addCarrier } = useCarriersAdaptive()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -68,7 +67,6 @@ export default function CreateCarrierModal({ trigger, onCarrierCreated }: Create
     setFormData({
       name: "",
       mc: "",
-      status: "ACTIVE",
       primaryContact: {
         name: "",
         phone: "",
@@ -154,21 +152,7 @@ export default function CreateCarrierModal({ trigger, onCarrierCreated }: Create
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
-            <Select 
-              value={formData.status} 
-              onValueChange={(value: "ACTIVE" | "INACTIVE") => handleInputChange("status", value)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ACTIVE">Active</SelectItem>
-                <SelectItem value="INACTIVE">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Primary Contact Section */}
 
           {/* Contacto Principal */}
           <div className="space-y-4">

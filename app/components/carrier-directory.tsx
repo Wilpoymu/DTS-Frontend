@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Search, Edit, Check, X, Save, Plus, Trash2, AlertTriangle, Clock, Users, Loader2 } from "lucide-react"
-import { useCarriers } from "@/hooks/use-carriers"
+import { useCarriersAdaptive } from "@/hooks/use-carriers-adaptive"
 import { Carrier as ApiCarrier } from "@/services/index"
 import CreateCarrierModal from "./create-carrier-modal"
 
@@ -40,7 +40,7 @@ export default function CarrierDirectory() {
     editCarrier, 
     removeCarrier,
     toggleCarrierStatus 
-  } = useCarriers()
+  } = useCarriersAdaptive()
 
   const assignedReps = ["Sarah Johnson", "Mike Wilson", "Tom Anderson", "Lisa Chen", "David Martinez"]
   const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
