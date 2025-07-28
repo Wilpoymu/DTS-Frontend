@@ -53,6 +53,9 @@ export const useWaterfall = (props: CarrierWaterfallsProps = {}) => {
   const [isEditingWaterfall, setIsEditingWaterfall] = useState(false)
   const [showTriggeredWarning, setShowTriggeredWarning] = useState(false)
   const [savedWaterfalls, setSavedWaterfalls] = useState<any[]>([])
+  const [selectedWaterfallForDetails, setSelectedWaterfallForDetails] = useState<any | null>(null)
+  const [highlightedLoadInfo, setHighlightedLoadInfo] = useState<any | null>(null)
+  const [showLoadDetailsAlert, setShowLoadDetailsAlert] = useState(false)
 
   // Funciones de sincronización (placeholder para compatibilidad)
   const syncWaterfallData = async (id: string) => {
@@ -156,6 +159,31 @@ export const useWaterfall = (props: CarrierWaterfallsProps = {}) => {
     setShowTriggeredWarning(false)
     clearWaterfallFromLocalStorage()
   }, [clearWaterfallFromLocalStorage])
+
+  // Función para volver a la vista principal desde detalles
+  const handleBackToWaterfalls = useCallback(() => {
+    setSelectedWaterfallForDetails(null)
+    setHighlightedLoadInfo(null)
+    setShowLoadDetailsAlert(false)
+    setCurrentStep("lane-creation")
+  }, [])
+
+  // Función para editar un waterfall desde la vista de detalles
+  const handleEditWaterfall = useCallback(() => {
+    if (selectedWaterfallForDetails) {
+      // Cargar los datos del waterfall seleccionado para edición
+      setCurrentLane(selectedWaterfallForDetails)
+      if (selectedWaterfallForDetails.waterfall?.items) {
+        setWaterfallItems(selectedWaterfallForDetails.waterfall.items)
+      }
+      if (selectedWaterfallForDetails.waterfall?.customTiers) {
+        setCustomTiers(selectedWaterfallForDetails.waterfall.customTiers)
+      }
+      setAutoTierEnabled(selectedWaterfallForDetails.waterfall?.autoTierEnabled || false)
+      setIsEditingWaterfall(true)
+      setCurrentStep("waterfall-config")
+    }
+  }, [selectedWaterfallForDetails])
 
   // Función para reiniciar con una nueva lane
   const startNewWaterfall = useCallback(() => {
@@ -354,11 +382,19 @@ export const useWaterfall = (props: CarrierWaterfallsProps = {}) => {
     setShowTriggeredWarning,
     savedWaterfalls,
     setSavedWaterfalls,
+    selectedWaterfallForDetails,
+    setSelectedWaterfallForDetails,
+    highlightedLoadInfo,
+    setHighlightedLoadInfo,
+    showLoadDetailsAlert,
+    setShowLoadDetailsAlert,
 
     // Funciones de manejo de estado
     clearState,
     startNewWaterfall,
     saveWaterfallChanges,
+    handleBackToWaterfalls,
+    handleEditWaterfall,
     
     // Sync functions
     forceSyncAllData,
