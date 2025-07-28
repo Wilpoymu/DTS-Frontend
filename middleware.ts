@@ -1,7 +1,28 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+// Configuración de modo demo
+const DEMO_MODE = true; // Cambiar a false para volver al modo de autenticación normal
+
 export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  
+  if (DEMO_MODE) {
+    // MODO DEMO ACTIVADO - SIN AUTENTICACIÓN REQUERIDA
+    console.log('🔧 [MIDDLEWARE] Demo mode enabled - bypassing authentication')
+    
+    // Redirigir la raíz directamente a carrier-waterfalls (página principal de la app)
+    if (pathname === '/') {
+      return NextResponse.redirect(new URL('/carrier-waterfalls', request.url))
+    }
+
+    // Permitir acceso a todas las rutas sin verificación de autenticación
+    return NextResponse.next()
+  }
+  
+  // MODO PRODUCCIÓN - CON AUTENTICACIÓN REQUERIDA
+  console.log('🔒 [MIDDLEWARE] Production mode - authentication required')
+  
   // Rutas que requieren autenticación
   const protectedPaths = [
     '/dashboard',
@@ -19,8 +40,6 @@ export function middleware(request: NextRequest) {
     '/auth/forgot-password',
     '/auth/activate-account'
   ]
-
-  const { pathname } = request.nextUrl
   
   // Verificar si es una ruta protegida
   const isProtectedPath = protectedPaths.some(path => pathname.startsWith(path))
