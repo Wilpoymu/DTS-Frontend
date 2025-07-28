@@ -431,16 +431,101 @@ export default function CarrierDirectory() {
                     <TableCell className="text-xs">
                       {carrier.secondaryContact ? (
                         <div className="space-y-1">
-                          <div className="font-medium text-xs">{carrier.secondaryContact.name}</div>
-                          {carrier.secondaryContact.phone && (
-                            <div className="text-xs text-gray-500">{carrier.secondaryContact.phone}</div>
+                          {isEditing(carrier.id, "secondaryContact.name") ? (
+                            <div className="flex items-center gap-1">
+                              <Input
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value)}
+                                className="w-28 h-6 text-xs"
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") saveEdit()
+                                  if (e.key === "Escape") cancelEdit()
+                                }}
+                                autoFocus
+                              />
+                              <Button size="sm" variant="outline" onClick={saveEdit} className="h-6 w-6 p-0">
+                                <Check className="h-2 w-2" />
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={cancelEdit} className="h-6 w-6 p-0">
+                                <X className="h-2 w-2" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div
+                              className="font-medium cursor-pointer hover:bg-gray-50 p-1 rounded flex items-center gap-1 text-xs"
+                              onClick={() => startEditing(carrier.id, "secondaryContact.name", carrier.secondaryContact?.name || "")}
+                            >
+                              {carrier.secondaryContact?.name || "No name"}
+                              <Edit className="h-2 w-2 text-gray-400" />
+                            </div>
                           )}
-                          {carrier.secondaryContact.email && (
-                            <div className="text-xs text-gray-500 mt-1">{carrier.secondaryContact.email}</div>
+                          
+                          {isEditing(carrier.id, "secondaryContact.phone") ? (
+                            <div className="flex items-center gap-1">
+                              <Input
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value)}
+                                className="w-28 h-6 text-xs"
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") saveEdit()
+                                  if (e.key === "Escape") cancelEdit()
+                                }}
+                                autoFocus
+                              />
+                              <Button size="sm" variant="outline" onClick={saveEdit} className="h-6 w-6 p-0">
+                                <Check className="h-2 w-2" />
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={cancelEdit} className="h-6 w-6 p-0">
+                                <X className="h-2 w-2" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div
+                              className="text-xs text-gray-500 cursor-pointer hover:bg-gray-50 p-1 rounded flex items-center gap-1"
+                              onClick={() => startEditing(carrier.id, "secondaryContact.phone", carrier.secondaryContact?.phone || "")}
+                            >
+                              {carrier.secondaryContact?.phone || "No phone"}
+                              <Edit className="h-2 w-2 text-gray-400" />
+                            </div>
+                          )}
+                          
+                          {isEditing(carrier.id, "secondaryContact.email") ? (
+                            <div className="flex items-center gap-1">
+                              <Input
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value)}
+                                className="w-28 h-6 text-xs"
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") saveEdit()
+                                  if (e.key === "Escape") cancelEdit()
+                                }}
+                                autoFocus
+                              />
+                              <Button size="sm" variant="outline" onClick={saveEdit} className="h-6 w-6 p-0">
+                                <Check className="h-2 w-2" />
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={cancelEdit} className="h-6 w-6 p-0">
+                                <X className="h-2 w-2" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div
+                              className="text-xs text-gray-500 cursor-pointer hover:bg-gray-50 p-1 rounded flex items-center gap-1 mt-1"
+                              onClick={() => startEditing(carrier.id, "secondaryContact.email", carrier.secondaryContact?.email || "")}
+                            >
+                              {carrier.secondaryContact?.email || "No email"}
+                              <Edit className="h-2 w-2 text-gray-400" />
+                            </div>
                           )}
                         </div>
                       ) : (
-                        <span className="text-gray-400 text-xs">No secondary contact</span>
+                        <div
+                          className="text-gray-400 text-xs cursor-pointer hover:bg-gray-50 p-1 rounded flex items-center gap-1"
+                          onClick={() => startEditing(carrier.id, "secondaryContact.name", "")}
+                        >
+                          Add secondary contact
+                          <Edit className="h-2 w-2 text-gray-400" />
+                        </div>
                       )}
                     </TableCell>
 
