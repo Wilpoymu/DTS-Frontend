@@ -50,8 +50,10 @@ export default function DashboardLayout({
   const pathname = usePathname()
   const { currentUser, logout } = useAuth()
 
+  // MODO DEMO/TESTING - Logout opcional
   const handleLogout = () => {
     logout()
+    // Redirigir a login solo si no estamos en modo demo
     router.push('/auth/login')
   }
 
@@ -94,9 +96,14 @@ export default function DashboardLayout({
             </Button>
           </div>
           {!sidebarCollapsed && <p className="text-sm text-gray-600 mt-1">Carrier dispatch sequences</p>}
-          {currentUser && (
+          {/* Mostrar usuario o info de demo */}
+          {currentUser ? (
             <div className="mt-2 text-xs text-gray-500">
               Logged in as <span className="font-semibold">{currentUser.name}</span>
+            </div>
+          ) : (
+            <div className="mt-2 text-xs text-blue-600 bg-blue-50 p-2 rounded">
+              <strong>DEMO MODE</strong> - Full access without authentication
             </div>
           )}
         </div>
@@ -133,6 +140,7 @@ export default function DashboardLayout({
                 !sidebarCollapsed && "justify-start"
               )} 
               onClick={handleLogout}
+              title={!currentUser ? "Demo mode - Logout optional" : "Logout"}
             >
               <LogOut className="h-4 w-4" />
               {!sidebarCollapsed && <span className="ml-2 font-medium">Log out</span>}
@@ -152,9 +160,14 @@ export default function DashboardLayout({
           <div className="p-4 border-b border-gray-200">
             <h1 className="text-xl font-bold text-gray-900">DTS Carrier Matching</h1>
             <p className="text-sm text-gray-600 mt-1">Carrier matching and logistics operations</p>
-            {currentUser && (
+            {/* Mostrar usuario o info de demo en móvil */}
+            {currentUser ? (
               <div className="mt-2 text-xs text-gray-500">
                 Logged in as <span className="font-semibold">{currentUser.name}</span>
+              </div>
+            ) : (
+              <div className="mt-2 text-xs text-blue-600 bg-blue-50 p-2 rounded">
+                <strong>DEMO MODE</strong> - Full access without authentication
               </div>
             )}
           </div>
@@ -184,6 +197,7 @@ export default function DashboardLayout({
                 variant="outline" 
                 className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors" 
                 onClick={handleLogout}
+                title={!currentUser ? "Demo mode - Logout optional" : "Logout"}
               >
                 <LogOut className="h-4 w-4" />
                 <span className="ml-2 font-medium">Log out</span>
