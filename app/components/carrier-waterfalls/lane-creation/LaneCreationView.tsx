@@ -79,7 +79,50 @@ export default function LaneCreationView({
       waterfall: {
         id: "wf-1",
         status: "Active",
-        items: [],
+        items: [
+          {
+            id: "1753726213323-5vrrhkvss",
+            carrier: {
+              id: "4",
+              name: "Cold Chain Logistics",
+              mcNumber: "MC456789",
+              contactEmail: "reefer@coldchain.com",
+              contactName: "Amanda Davis",
+              secondaryContactName: "Mark Thompson",
+              secondaryContactEmail: "mark.t@coldchain.com",
+              assignedRep: "Sarah Johnson",
+              carrierMcNumber: "MC456789",
+              rate: 2.8,
+              acceptancePercentage: 90,
+              onTimePickupPercentage: 94,
+              onTimeDeliveryPercentage: 92,
+              availability: [{ id: "1753726210259", days: ["Monday", "Wednesday", "Friday"], capacity: 1 }]
+            },
+            responseWindow: 30
+          },
+          {
+            id: "1753726305171-c74jd1lo8",
+            carrier: {
+              id: "5",
+              name: "Heavy Haul Specialists",
+              mcNumber: "MC567890",
+              contactEmail: "heavy@heavyhaul.com",
+              contactName: "Tom Anderson",
+              secondaryContactName: "Rachel Green",
+              secondaryContactEmail: "rachel.g@heavyhaul.com",
+              assignedRep: "Tom Anderson",
+              carrierMcNumber: "MC567890",
+              rate: 2.8,
+              acceptancePercentage: 75,
+              onTimePickupPercentage: 87,
+              onTimeDeliveryPercentage: 89,
+              availability: [{ id: "1753726300755", days: ["Monday", "Wednesday", "Friday", "Tuesday", "Thursday"], capacity: 1 }]
+            },
+            responseWindow: 30
+          }
+        ],
+        autoTierEnabled: true,
+        customTiers: [{ id: "tier-1753726257523-d2dfeza97", name: "Premium Carriers", carrierIds: ["4"], order: 1 }]
       },
     },
     {
@@ -90,6 +133,54 @@ export default function LaneCreationView({
       status: "Triggered",
       quotedLoads: 8,
       creationDate: "2024-01-12",
+      waterfall: {
+        id: "wf-2",
+        status: "Active",
+        items: [
+          {
+            id: "1753726246987-fqcfoy81j",
+            carrier: {
+              id: "8",
+              name: "Premium Logistics Group",
+              mcNumber: "MC890123",
+              contactEmail: "premium@logistics.com",
+              contactName: "Brian Clark",
+              secondaryContactName: "Nicole Adams",
+              secondaryContactEmail: "nicole.a@logistics.com",
+              assignedRep: "Lisa Rodriguez",
+              carrierMcNumber: "MC890123",
+              rate: 3,
+              acceptancePercentage: 86,
+              onTimePickupPercentage: 91,
+              onTimeDeliveryPercentage: 90,
+              availability: [{ id: "1753726240964", days: ["Monday", "Wednesday", "Friday", "Sunday", "Saturday", "Thursday", "Tuesday"], capacity: 3 }]
+            },
+            responseWindow: 30
+          },
+          {
+            id: "1753726228124-h4wugxt2n",
+            carrier: {
+              id: "3",
+              name: "Quick Haul Inc",
+              mcNumber: "MC345678",
+              contactEmail: "dispatch@quickhaul.com",
+              contactName: "Robert Taylor",
+              secondaryContactName: "Jessica Lee",
+              secondaryContactEmail: "jessica.l@quickhaul.com",
+              assignedRep: "Mike Wilson",
+              carrierMcNumber: "MC345678",
+              rate: 1.95,
+              acceptancePercentage: 82,
+              onTimePickupPercentage: 89,
+              onTimeDeliveryPercentage: 86,
+              availability: [{ id: "1753726224387", days: ["Monday", "Tuesday", "Thursday", "Wednesday", "Friday"], capacity: 2 }]
+            },
+            responseWindow: 30
+          }
+        ],
+        autoTierEnabled: false,
+        customTiers: []
+      },
     },
     {
       id: "3",
@@ -99,6 +190,34 @@ export default function LaneCreationView({
       status: "Completed",
       quotedLoads: 5,
       creationDate: "2024-01-08",
+      waterfall: {
+        id: "wf-3",
+        status: "Active",
+        items: [
+          {
+            id: "flatbed-carrier-1",
+            carrier: {
+              id: "6",
+              name: "Flatbed Express",
+              mcNumber: "MC678901",
+              contactEmail: "dispatch@flatbedexpress.com",
+              contactName: "Mike Johnson",
+              secondaryContactName: "Sarah Wilson",
+              secondaryContactEmail: "sarah@flatbedexpress.com",
+              assignedRep: "David Martinez",
+              carrierMcNumber: "MC678901",
+              rate: 2.5,
+              acceptancePercentage: 88,
+              onTimePickupPercentage: 92,
+              onTimeDeliveryPercentage: 94,
+              availability: [{ id: "flatbed-avail-1", days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], capacity: 2 }]
+            },
+            responseWindow: 45
+          }
+        ],
+        autoTierEnabled: false,
+        customTiers: []
+      },
     },
     {
       id: "4",
@@ -108,6 +227,57 @@ export default function LaneCreationView({
       status: "Paused",
       quotedLoads: 15,
       creationDate: "2024-01-15",
+      waterfall: {
+        id: "wf-4",
+        status: "Draft",
+        items: [
+          {
+            id: "dryvan-carrier-1",
+            carrier: {
+              id: "7",
+              name: "Reliable Transport",
+              mcNumber: "MC789012",
+              contactEmail: "ops@reliabletransport.com",
+              contactName: "Jennifer Brown",
+              secondaryContactName: "Mark Davis",
+              secondaryContactEmail: "mark@reliabletransport.com",
+              assignedRep: "Lisa Chen",
+              carrierMcNumber: "MC789012",
+              rate: 2.2,
+              acceptancePercentage: 85,
+              onTimePickupPercentage: 90,
+              onTimeDeliveryPercentage: 88,
+              availability: [{ id: "reliable-avail-1", days: ["Monday", "Wednesday", "Friday"], capacity: 3 }]
+            },
+            responseWindow: 30
+          },
+          {
+            id: "dryvan-carrier-2",
+            carrier: {
+              id: "9",
+              name: "Southeast Shipping",
+              mcNumber: "MC901234",
+              contactEmail: "dispatch@southeastship.com",
+              contactName: "Carlos Rodriguez",
+              secondaryContactName: "Anna Martinez",
+              secondaryContactEmail: "anna@southeastship.com",
+              assignedRep: "Tom Anderson",
+              carrierMcNumber: "MC901234",
+              rate: 2.1,
+              acceptancePercentage: 79,
+              onTimePickupPercentage: 86,
+              onTimeDeliveryPercentage: 84,
+              availability: [{ id: "southeast-avail-1", days: ["Tuesday", "Thursday", "Saturday"], capacity: 2 }]
+            },
+            responseWindow: 35
+          }
+        ],
+        autoTierEnabled: true,
+        customTiers: [
+          { id: "tier-primary", name: "Primary Carriers", carrierIds: ["7"], order: 1 },
+          { id: "tier-backup", name: "Backup Carriers", carrierIds: ["9"], order: 2 }
+        ]
+      },
     },
     {
       id: "5",
@@ -117,6 +287,13 @@ export default function LaneCreationView({
       status: "Not Triggered",
       quotedLoads: 0,
       creationDate: "2024-01-18",
+      waterfall: {
+        id: "wf-5",
+        status: "Active",
+        items: [],
+        autoTierEnabled: false,
+        customTiers: []
+      },
     },
   ]
 

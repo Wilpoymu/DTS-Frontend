@@ -53,6 +53,8 @@ export default function CarrierWaterfall(props: CarrierWaterfallsProps = {}) {
             setCurrentView('waterfall-config') // Ir directamente a la configuración
           }}
           onViewWaterfallDetails={(lane) => {
+            console.log('🔍 View waterfall details for lane:', lane)
+            console.log('🔍 Lane waterfall items:', lane.waterfall?.items)
             waterfall.setSelectedWaterfallForDetails(lane)
             waterfall.setCurrentStep('waterfall-details')
             setCurrentView('waterfall-details') // Ir a la vista de detalles
@@ -119,7 +121,16 @@ export default function CarrierWaterfall(props: CarrierWaterfallsProps = {}) {
     return (
       <WaterfallDetailsView
         currentLane={waterfall.selectedWaterfallForDetails}
-        waterfallItems={waterfall.selectedWaterfallForDetails.waterfall?.items || []}
+        waterfallItems={(() => {
+          const items = waterfall.selectedWaterfallForDetails.waterfall?.items || []
+          console.log('🔍 Passing waterfall items to details view:', items)
+          console.log('🔍 Items length:', items.length)
+          if (items.length > 0) {
+            console.log('🔍 First item structure:', items[0])
+            console.log('🔍 First item responseWindow:', items[0]?.responseWindow)
+          }
+          return items
+        })()}
         customTiers={waterfall.selectedWaterfallForDetails.waterfall?.customTiers || []}
         highlightedLoadInfo={waterfall.highlightedLoadInfo}
         showLoadDetailsAlert={waterfall.showLoadDetailsAlert}
