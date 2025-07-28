@@ -11,6 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { getLocalLoads, saveLocalLoads, autoAssociateAllLocalLoadsToWaterfalls, importFirst20LoadsFromBackend } from "@/lib/loads-local";
 import { getAssociatedWaterfallId, autoAssociateLoad } from "@/lib/load-waterfall-local";
 import { useGenericLocalStorage } from "./carrier-waterfalls/shared/hooks/useGenericLocalStorage";
+import { useLoadsAdaptive } from "@/hooks/use-loads-adaptive";
+import { useWaterfallsAdaptive } from "@/hooks/use-waterfalls-adaptive";
+import { Load as ServiceLoad } from "@/services/index";
+import { Lane } from "./carrier-waterfalls/shared/types";
 import CarrierWaterfall from "./carrier-waterfalls";
 
 interface Load {
@@ -30,6 +34,22 @@ interface Load {
   assignedTier?: string  // En qué tier del waterfall quedó asignada
 }
 
+// Función para transformar loads del servicio al formato del componente
+function transformServiceLoadsToComponentFormat(serviceLoads: ServiceLoad[]): Load[] {
+  return serviceLoads.map(serviceLoad => ({
+    id: serviceLoad.id.toString(),
+    status: serviceLoad.accepted ? "Booked Covered" : "Booked not Covered" as "Booked Covered" | "Booked not Covered",
+    estimatedPickupDateTime: serviceLoad.pickupDate,
+    estimatedDeliveryDateTime: serviceLoad.estimatedDeliveryDate,
+    equipment: "Dry Van", // Default value, should come from service
+    rate: "$0", // Default value, should come from service
+    bookingDateTime: serviceLoad.createdAt,
+    waterfallId: serviceLoad.waterfallId ? serviceLoad.waterfallId.toString() : "",
+    waterfallName: `${serviceLoad.originZip} → ${serviceLoad.destinationZip}`,
+    assignedCarrier: serviceLoad.waterfallCarrierId ? `Carrier ${serviceLoad.waterfallCarrierId}` : undefined,
+  }));
+}
+
 interface ActivePastLanesProps {
   onNavigateToWaterfall?: (waterfallId: string, loadInfo?: { loadId: string; laneId?: string; assignedTier?: string }) => void
 }
@@ -44,33 +64,55 @@ export default function ActivePastLanes({ onNavigateToWaterfall }: ActivePastLan
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Obtener waterfalls guardados en localStorage (como lanes)
-  const [savedWaterfalls] = useGenericLocalStorage("carrierWaterfalls", []);
+  // Hook adaptativo para waterfalls
+  const { waterfalls: adaptiveWaterfalls } = useWaterfallsAdaptive();
+
+  // Hook adaptativo para loads (funciona tanto en modo demo como backend)
+  const { 
+    loads: adaptiveLoads, 
+    loading: loadsLoading, 
+    updateLoad,
+    deleteLoad 
+  } = useLoadsAdaptive();
 
   useEffect(() => {
-    setIsLoading(true);
-    const localLoads = getLocalLoads();
-    setLoads(localLoads);
-    setIsLoading(false);
-    setTotalPages(Math.max(1, Math.ceil(localLoads.length / limit)));
-    setPage(1);
-  }, []);
+    // Usar los loads adaptativos en lugar de localStorage directo
+    if (adaptiveLoads && Array.isArray(adaptiveLoads) && !loadsLoading) {
+      try {
+        const transformedLoads = transformServiceLoadsToComponentFormat(adaptiveLoads);
+        setLoads(transformedLoads);
+        setTotalPages(Math.max(1, Math.ceil(transformedLoads.length / limit)));
+        setPage(1);
+      } catch (error) {
+        console.error('Error transforming loads:', error);
+        setLoads([]);
+      }
+    } else if (!loadsLoading) {
+      // Si no hay loads o aún no están cargados, establecer array vacío
+      setLoads([]);
+    }
+    setIsLoading(loadsLoading);
+  }, [adaptiveLoads, loadsLoading, limit]);
 
   // Botón para autoasociar loads locales
   function handleAutoAssociate() {
-    autoAssociateAllLocalLoadsToWaterfalls();
-    const updated = getLocalLoads();
-    setLoads(updated);
+    console.log('Auto-associate function called - using adaptive loads now');
+    // En modo demo, los loads ya están asociados
+    // autoAssociateAllLocalLoadsToWaterfalls();
+    // const updated = getLocalLoads();
+    // setLoads(updated);
   }
 
   async function handleRefreshLoads() {
-    setIsLoading(true);
-    await importFirst20LoadsFromBackend();
-    const updated = getLocalLoads();
-    setLoads(updated);
-    setTotalPages(Math.max(1, Math.ceil(updated.length / limit)));
-    setPage(1);
-    setIsLoading(false);
+    console.log('Refresh loads function called - using adaptive loads now');
+    // En modo demo, los loads se cargan automáticamente
+    // setIsLoading(true);
+    // await importFirst20LoadsFromBackend();
+    // const updated = getLocalLoads();
+    // setLoads(updated);
+    // setTotalPages(Math.max(1, Math.ceil(updated.length / limit)));
+    // setPage(1);
+    // setIsLoading(false);
   }
 
   const paginatedLoads = loads.slice((page - 1) * limit, page * limit);
@@ -90,11 +132,22 @@ export default function ActivePastLanes({ onNavigateToWaterfall }: ActivePastLan
   // Función para obtener el nombre del waterfall asociado
   function getAssociatedWaterfallName(load: Load) {
     let waterfallId = getAssociatedWaterfallId(load.id);
-    if (!waterfallId) {
-      waterfallId = autoAssociateLoad(load, savedWaterfalls);
+    if (!waterfallId && adaptiveWaterfalls) {
+      // En modo demo, buscar por origin/destination zip
+      const matchingWaterfall = adaptiveWaterfalls.find(wf => 
+        load.waterfallName.includes(`${wf.originZip} → ${wf.destinationZip}`)
+      );
+      if (matchingWaterfall) {
+        waterfallId = matchingWaterfall.id;
+      }
     }
-    const wf = savedWaterfalls.find(wf => wf.lane && wf.lane.id === waterfallId);
-    return wf ? `${wf.lane.originZip} → ${wf.lane.destinationZip}` : "-";
+    
+    if (adaptiveWaterfalls) {
+      const wf = adaptiveWaterfalls.find(wf => wf.id === waterfallId);
+      return wf ? `${wf.originZip} → ${wf.destinationZip}` : load.waterfallName || "-";
+    }
+    
+    return load.waterfallName || "-";
   }
 
   const getStatusBadge = (status: Load["status"]) => {
@@ -125,8 +178,14 @@ export default function ActivePastLanes({ onNavigateToWaterfall }: ActivePastLan
 
   const handleWaterfallClick = (load: Load) => {
     let waterfallId = getAssociatedWaterfallId(load.id);
-    if (!waterfallId) {
-      waterfallId = autoAssociateLoad(load, savedWaterfalls);
+    if (!waterfallId && adaptiveWaterfalls) {
+      // En modo demo, buscar por origin/destination zip
+      const matchingWaterfall = adaptiveWaterfalls.find(wf => 
+        load.waterfallName.includes(`${wf.originZip} → ${wf.destinationZip}`)
+      );
+      if (matchingWaterfall) {
+        waterfallId = matchingWaterfall.id;
+      }
     }
     if (onNavigateToWaterfall && waterfallId) {
       const loadInfo = load.status === "Booked Covered" ? {
