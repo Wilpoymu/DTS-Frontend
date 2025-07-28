@@ -2,18 +2,27 @@
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/AuthContext"
+import { autoInitializeDemoData } from "@/lib/demo-data-initializer"
 
 export default function HomePage() {
   const { isAuthenticated, loading } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
+    // Inicializar datos de demo automáticamente al cargar la aplicación
+    autoInitializeDemoData()
+    
     if (!loading) {
+      // MODO DEMO/TESTING - Siempre redirigir a carrier-waterfalls sin verificar autenticación
+      router.push('/carrier-waterfalls')
+      
+      /* LÓGICA ORIGINAL CON AUTENTICACIÓN (COMENTADA PARA DEMO)
       if (isAuthenticated) {
         router.push('/dashboard')
       } else {
         router.push('/auth/login')
       }
+      */
     }
   }, [isAuthenticated, loading, router])
 
