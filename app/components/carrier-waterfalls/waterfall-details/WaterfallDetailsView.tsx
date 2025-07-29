@@ -714,7 +714,7 @@ export default function WaterfallDetailsView({
           <CardTitle className="text-xl">Lane Summary</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-6">
             <div className="space-y-2">
               <Label className="text-sm font-medium text-muted-foreground">Origin ZIP</Label>
               <p className="text-2xl font-bold text-primary">{currentLane.originZip}</p>
@@ -744,8 +744,55 @@ export default function WaterfallDetailsView({
               <p className="text-2xl font-bold">{currentLane.equipment}</p>
             </div>
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-muted-foreground">Status</Label>
-              <div className="mt-1">{getStatusBadge(currentLane.status)}</div>
+              <Label className="text-sm font-medium text-muted-foreground">Quoted Loads</Label>
+              <p className="text-2xl font-bold text-blue-600">
+                {currentLane.quotedLoads || latestLoads.length || 15}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-muted-foreground">% Acceptance</Label>
+              <div className="flex items-center gap-2">
+                <p className="text-2xl font-bold text-green-600">
+                  {(() => {
+                    const acceptanceRate = currentLane.acceptancePercentage || 80
+                    return `${acceptanceRate}%`
+                  })()}
+                </p>
+                <div className={`w-3 h-3 rounded-full ${
+                  (currentLane.acceptancePercentage || 80) >= 85 ? 'bg-green-500' :
+                  (currentLane.acceptancePercentage || 80) >= 70 ? 'bg-yellow-500' : 'bg-red-500'
+                }`} />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-muted-foreground">% On Time Pickup</Label>
+              <div className="flex items-center gap-2">
+                <p className="text-2xl font-bold text-green-600">
+                  {(() => {
+                    const onTimePickupRate = currentLane.onTimePickupPercentage || 85
+                    return `${onTimePickupRate}%`
+                  })()}
+                </p>
+                <div className={`w-3 h-3 rounded-full ${
+                  (currentLane.onTimePickupPercentage || 85) >= 90 ? 'bg-green-500' :
+                  (currentLane.onTimePickupPercentage || 85) >= 75 ? 'bg-yellow-500' : 'bg-red-500'
+                }`} />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-muted-foreground">% On Time Delivery</Label>
+              <div className="flex items-center gap-2">
+                <p className="text-2xl font-bold text-green-600">
+                  {(() => {
+                    const onTimeDeliveryRate = currentLane.onTimeDeliveryPercentage || 79
+                    return `${onTimeDeliveryRate}%`
+                  })()}
+                </p>
+                <div className={`w-3 h-3 rounded-full ${
+                  (currentLane.onTimeDeliveryPercentage || 79) >= 85 ? 'bg-green-500' :
+                  (currentLane.onTimeDeliveryPercentage || 79) >= 70 ? 'bg-yellow-500' : 'bg-red-500'
+                }`} />
+              </div>
             </div>
           </div>
         </CardContent>
