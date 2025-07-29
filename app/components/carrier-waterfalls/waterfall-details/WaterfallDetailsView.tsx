@@ -895,18 +895,21 @@ export default function WaterfallDetailsView({
                             <TableHeader>
                               <TableRow>
                                 <TableHead>Carrier Name</TableHead>
+                                <TableHead>Status</TableHead>
                                 <TableHead>MC Number</TableHead>
                                 <TableHead>Contact Name</TableHead>
                                 <TableHead>Contact Email</TableHead>
                                 <TableHead>Rate</TableHead>
                                 <TableHead>Response Window</TableHead>
-                                <TableHead>Status</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
                               {tierCarriers.map((item) => (
                                 <TableRow key={item.id}>
                                   <TableCell className="font-medium">{item.carrier.name}</TableCell>
+                                  <TableCell>
+                                    <Badge variant="default">Active</Badge>
+                                  </TableCell>
                                   <TableCell>{item.carrier.mcNumber}</TableCell>
                                   <TableCell>{item.carrier.contactName || '-'}</TableCell>
                                   <TableCell>{item.carrier.contactEmail || '-'}</TableCell>
@@ -922,9 +925,6 @@ export default function WaterfallDetailsView({
                                       <Clock className="h-3 w-3 text-muted-foreground" />
                                       <span className="text-sm">{item.responseWindow} min</span>
                                     </div>
-                                  </TableCell>
-                                  <TableCell>
-                                    <Badge variant="default">Active</Badge>
                                   </TableCell>
                                 </TableRow>
                               ))}
@@ -977,18 +977,21 @@ export default function WaterfallDetailsView({
                               <TableHeader>
                                 <TableRow>
                                   <TableHead>Carrier Name</TableHead>
+                                  <TableHead>Status</TableHead>
                                   <TableHead>MC Number</TableHead>
                                   <TableHead>Contact Name</TableHead>
                                   <TableHead>Contact Email</TableHead>
                                   <TableHead>Rate</TableHead>
                                   <TableHead>Response Window</TableHead>
-                                  <TableHead>Status</TableHead>
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
                                 {(items as any[]).map((item: any) => (
                                   <TableRow key={item.id}>
                                     <TableCell className="font-medium">{item.carrier.name}</TableCell>
+                                    <TableCell>
+                                      <Badge variant="default">Active</Badge>
+                                    </TableCell>
                                     <TableCell>{item.carrier.mcNumber}</TableCell>
                                     <TableCell>{item.carrier.contactName || '-'}</TableCell>
                                     <TableCell>{item.carrier.contactEmail || '-'}</TableCell>
@@ -1004,9 +1007,6 @@ export default function WaterfallDetailsView({
                                         <Clock className="h-3 w-3 text-muted-foreground" />
                                         <span className="text-sm">{item.responseWindow} min</span>
                                       </div>
-                                    </TableCell>
-                                    <TableCell>
-                                      <Badge variant="default">Active</Badge>
                                     </TableCell>
                                   </TableRow>
                                 ))}
@@ -1044,18 +1044,21 @@ export default function WaterfallDetailsView({
                             <TableHeader>
                               <TableRow>
                                 <TableHead>Carrier Name</TableHead>
+                                <TableHead>Status</TableHead>
                                 <TableHead>MC Number</TableHead>
                                 <TableHead>Contact Name</TableHead>
                                 <TableHead>Contact Email</TableHead>
                                 <TableHead>Rate</TableHead>
                                 <TableHead>Response Window</TableHead>
-                                <TableHead>Status</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
                               {individualCarriers.map((item: any) => (
                                 <TableRow key={item.id}>
                                   <TableCell className="font-medium">{item.carrier.name}</TableCell>
+                                  <TableCell>
+                                    <Badge variant="default">Active</Badge>
+                                  </TableCell>
                                   <TableCell>{item.carrier.mcNumber}</TableCell>
                                   <TableCell>{item.carrier.contactName || '-'}</TableCell>
                                   <TableCell>{item.carrier.contactEmail || '-'}</TableCell>
@@ -1071,9 +1074,6 @@ export default function WaterfallDetailsView({
                                       <Clock className="h-3 w-3 text-muted-foreground" />
                                       <span className="text-sm">{item.responseWindow} min</span>
                                     </div>
-                                  </TableCell>
-                                  <TableCell>
-                                    <Badge variant="default">Active</Badge>
                                   </TableCell>
                                 </TableRow>
                               ))}
@@ -1105,18 +1105,21 @@ export default function WaterfallDetailsView({
                           <TableHeader>
                             <TableRow>
                               <TableHead>Carrier Name</TableHead>
+                              <TableHead>Status</TableHead>
                               <TableHead>MC Number</TableHead>
                               <TableHead>Contact Name</TableHead>
                               <TableHead>Contact Email</TableHead>
                               <TableHead>Rate</TableHead>
                               <TableHead>Response Window</TableHead>
-                              <TableHead>Status</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {carriersNotInCustomTiers.map((item) => (
                               <TableRow key={item.id}>
                                 <TableCell className="font-medium">{item.carrier.name}</TableCell>
+                                <TableCell>
+                                  <Badge variant="default">Active</Badge>
+                                </TableCell>
                                 <TableCell>{item.carrier.mcNumber}</TableCell>
                                 <TableCell>{item.carrier.contactName || '-'}</TableCell>
                                 <TableCell>{item.carrier.contactEmail || '-'}</TableCell>
@@ -1132,9 +1135,6 @@ export default function WaterfallDetailsView({
                                     <Clock className="h-3 w-3 text-muted-foreground" />
                                     <span className="text-sm">{item.responseWindow} min</span>
                                   </div>
-                                </TableCell>
-                                <TableCell>
-                                  <Badge variant="default">Active</Badge>
                                 </TableCell>
                               </TableRow>
                             ))}
